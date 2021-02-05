@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const cTable = require("console.table");
-const connecting = require("db/database.js");
+//const connection = require("db/database.js");
+const getAllDepartments = require("./routes/dbRoutes.js");
 
 const selectTask = () => {
   inquirer
@@ -41,3 +42,5 @@ const getUserTask = () => {
       updateEmployeeRole();
   }
 };
+
+getUserTask();
