@@ -1,7 +1,7 @@
 const inquirer = require("inquirer");
-const cTable = require("console.table");
+//const cTable = require("console.table");
 //const connection = require("db/database.js");
-const getAllDepartments = require("./routes/dbRoutes.js");
+//const getAllDepartments = require("./routes/dbRoutes.js");
 
 const selectTask = () => {
   inquirer
@@ -22,25 +22,22 @@ const selectTask = () => {
       },
     ])
     .then((answer) => {
-      console.log(answer.userChoice);
+      switch (answer.userChoice) {
+        case "View all departments":
+          console.log("this");
+          getAllDepartments();
+        case "View all roles":
+          getAllRoles();
+        case "Add a department":
+          addDepartment();
+        case "Add a role":
+          addRole();
+        case "Add an employee":
+          addEmployee();
+        case "Update an employee role":
+          updateEmployeeRole();
+      }
     });
 };
 
-const getUserTask = () => {
-  switch (selectTask()) {
-    case "View all departments":
-      getAllDepartments();
-    case "View all roles":
-      getAllRoles();
-    case "Add a department":
-      addDepartment();
-    case "Add a role":
-      addRole();
-    case "Add an employee":
-      addEmployee();
-    case "Update an employee role":
-      updateEmployeeRole();
-  }
-};
-
-getUserTask();
+selectTask();
