@@ -1,20 +1,27 @@
 const connection = require("../db/database.js");
 const inquirer = require("inquirer");
+const mysql = require("mysql2");
+const cTable = require("console.table");
+const selectTask = require("../index");
+
+const getAllEmployees = () => {
+  connection.query("SELECT * FROM employees", function (err, res) {
+    if (err) throw err;
+    console.table(res);
+  });
+};
 
 const getAllDepartments = () => {
-  const query = connection.query(
-    "SELECT * FROM departments",
-    function (err, res) {
-      if (err) throw err;
-      console.log(res);
-    }
-  );
+  connection.query("SELECT * FROM departments", function (err, res) {
+    if (err) throw err;
+    console.table(res);
+  });
 };
 
 const getAllRoles = () => {
-  const query = connection.query("SELECT * FROM roles", function (err, res) {
+  connection.query("SELECT * FROM roles", function (err, res) {
     if (err) throw err;
-    console.log(res);
+    console.table(res);
   });
 };
 
@@ -29,14 +36,14 @@ const addDepartment = () => {
     ])
     .then((data) => {
       let departmentChoice = data.departmentChoice;
-      const query = connection.query(
+      connection.query(
         "INSERT INTO departments SET ?",
         {
           department_name: departmentChoice,
         },
         function (err, res) {
           if (err) throw err;
-          console.log(res);
+          console.log(departmentChoice + " added to Departments database!");
         }
       );
     });
@@ -65,7 +72,7 @@ const addRole = () => {
       let roleChoice = data.roleChoice;
       let salaryChoice = data.salaryChoice;
       let departmentChoice = data.departmentChoice;
-      const query = connection.query(
+      connection.query(
         "INSERT INTO roles SET ?",
         {
           title: roleChoice,
@@ -74,7 +81,7 @@ const addRole = () => {
         },
         function (err, res) {
           if (err) throw err;
-          console.log(res);
+          console.log(roleChoice + "added to Roles database!");
         }
       );
     });
@@ -109,7 +116,7 @@ const addEmployee = () => {
       let lastName = data.lastName;
       let roleIdChoice = data.roleIdChoice;
       let managerIdChoice = data.managerIdChoice;
-      const query = connection.query(
+      connection.query(
         "INSERT INTO employees SET ?",
         {
           first_name: firstName,
@@ -119,40 +126,77 @@ const addEmployee = () => {
         },
         function (err, res) {
           if (err) throw err;
-          console.log(res);
+          console.log(
+            firstName + lastName + " was added to the Employee database!"
+          );
         }
       );
     });
 };
 
 const updateEmployeeRole = () => {
+  const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    database: "employees_db",
+    password: "Ch1ck3nB0n3@SQL",
+  });
   const firstNameArr = [];
   const lastNameArr = [];
   const fullNameArr = [];
-  employees = connection
-    .query("SELECT * FROM employees", function (err, res) {
-      if (err) throw err;
-      for (i = 0; i < res.length; i++) {
-        firstNameArr.push(res[i].first_name);
+  employees = con
+    .promise()
+    .query("SELECT * FROM employees")
+    .then((data) => {
+      const dataArr = data[0];
+      console.log(dataArr[0]);
+      for (i = 0; i < dataArr.length; i++) {
+        firstNameArr.push(dataArr[i].first_name);
       }
-      for (i = 0; i < res.length; i++) {
-        lastNameArr.push(res[i].last_name);
+      for (i = 0; i < dataArr.length; i++) {
+        lastNameArr.push(dataArr[i].last_name);
       }
-      for (i = 0; i < res.length; i++) {
+      for (i = 0; i < dataArr.length; i++) {
         let name = firstNameArr[i] + " " + lastNameArr[i];
         fullNameArr.push(name);
       }
+      console.log(fullNameArr);
     })
     .then(() => {
-      inquirer.prompt([
+      return inquirer.prompt([
         {
           type: "list",
           name: "employeeChoice",
           message: "Which employee's role would you like to update?",
           choices: fullNameArr,
         },
+        {
+          type: "input",
+          name: "roleChoice",
+          message: "What is their new role ID?",
+        },
       ]);
-    });
+    })
+    .then((choice) => {
+      const chosenEmployeeArr = choice.employeeChoice.split(" ");
+      const chosenRole = choice.roleChoice;
+      connection.query(
+        "UPDATE employees SET role_id = ? WHERE first_name = ? AND last_name = ?",
+        [chosenRole, chosenEmployeeArr[0], chosenEmployeeArr[1]]
+      );
+      console.log(
+        choice.employeeChoice + " role updated to " + chosenRole + "!"
+      );
+    })
+    .then(() => con.end());
 };
 
-updateEmployeeRole();
+module.exports = {
+  getAllEmployees,
+  getAllDepartments,
+  getAllRoles,
+  addDepartment,
+  addRole,
+  addEmployee,
+  updateEmployeeRole,
+};
