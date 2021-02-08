@@ -4,6 +4,8 @@
 
 This is a command line application desigined to help track your employees. You can add employees, roles, departments, and the various aspects of all of them. It was made using Node.js, inquirer npm package, mysql2 npm package, console.table npm package, and mysql for the database.
 
+Demo video: https://github.com/Frankenshtien/employee-tracker
+
 ## Table of Contents
 
 - [installation](#installation)
